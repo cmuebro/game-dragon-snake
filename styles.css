@@ -231,13 +231,10 @@ canvas.slowtime {
     0 3px 8px rgba(60,30,10,0.45);
 }
 .corner-btn-bottom { bottom: 22px; right: 22px; }
-.corner-btn-fixed {
-  position: fixed;
-  bottom: 22px;
-  right: 22px;
-  z-index: 12;
-}
-.corner-btn-fixed .info-icon {
+.corner-btn:hover { background: linear-gradient(180deg, #f8d884, #d49828); }
+.corner-btn:active { transform: scale(0.94); }
+
+.info-icon {
   font-family: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
   font-weight: 700;
   font-size: 26px;
@@ -245,16 +242,7 @@ canvas.slowtime {
   display: block;
   transform: translateY(-1px);
 }
-.corner-btn:hover { background: linear-gradient(180deg, #f8d884, #d49828); }
-.corner-btn:active { transform: scale(0.94); }
-
-.corner-btn-volume {
-  position: fixed;
-  bottom: 22px;
-  right: 82px;
-  z-index: 12;
-}
-.corner-btn-volume .volume-icon {
+.volume-icon {
   font-family: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
   font-weight: 700;
   font-size: 24px;
@@ -264,9 +252,9 @@ canvas.slowtime {
 }
 
 .volume-panel {
-  position: fixed;
-  bottom: 82px;
-  right: 22px;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
   z-index: 12;
   padding: 12px 16px 10px;
   background: linear-gradient(180deg, rgba(255,245,215,0.97), rgba(232,210,160,0.97));
@@ -477,8 +465,26 @@ canvas.slowtime {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  overflow-y: auto;
+  overflow: hidden;
 }
+.side-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.side-corner {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding-top: 8px;
+  position: relative;
+}
+.side-corner .corner-btn { position: static; }
+.volume-wrap { position: relative; }
 
 h1 {
   font-family: 'MedievalSharp', 'Cinzel', Georgia, serif;
