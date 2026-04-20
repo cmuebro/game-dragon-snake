@@ -188,14 +188,15 @@
     if (hpText) hpText.textContent = `${Math.ceil(state.hp)} / ${state.maxHp}`;
 
     const livesEl = el('hudLives');
-    if (livesEl) {
+    if (livesEl && livesEl.dataset.count !== String(state.lives)) {
       livesEl.innerHTML = '';
       for (let i = 0; i < state.lives; i++) {
         const span = document.createElement('span');
-        span.textContent = '❤';
+        span.textContent = '❤\uFE0E';
         span.style.color = i < 3 ? '#c8252f' : '#e8b820';
         livesEl.appendChild(span);
       }
+      livesEl.dataset.count = String(state.lives);
     }
 
     const pauseBtn = el('btnPause');
