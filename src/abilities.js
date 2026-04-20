@@ -72,14 +72,6 @@
   });
 
   register({
-    id: 'phase', slot: 'secondary', price: 50,
-    icon: '🌀', name: 'Geisterhaut',
-    desc: 'Shift: 5s durch eigenen Schwanz gleiten.',
-    cooldown: 25000,
-    activate(state) { state.activeEffects.phase = 5000; },
-  });
-
-  register({
     id: 'magnet', slot: 'passive', price: 55,
     icon: '🧲', name: 'Magnet',
     desc: 'Passiv: zieht Juwelen & Münzen in geringer Reichweite an.',

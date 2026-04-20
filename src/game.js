@@ -200,7 +200,6 @@
     const head = s.snake[0];
     const newHead = { x: head.x + s.dir.x, y: head.y + s.dir.y };
     const ghost = s.activeEffects.ghost > 0;
-    const phase = s.activeEffects.phase > 0;
 
     if (newHead.x < 0 || newHead.x >= W || newHead.y < 0 || newHead.y >= H) {
       newHead.x = (newHead.x + W) % W;
@@ -235,9 +234,8 @@
     }
 
     const body = s.snake.slice(0, -1);
-    if (!phase && body.some(seg => seg.x === newHead.x && seg.y === newHead.y)) {
+    if (body.some(seg => seg.x === newHead.x && seg.y === newHead.y)) {
       takeDamage(s, 40, 'Selbstbiss', { skipSteer: true });
-      // Durchflug erlaubt: Drache bewegt sich ausnahmsweise weiter durch sich selbst
     }
 
     s.snake.unshift(newHead);

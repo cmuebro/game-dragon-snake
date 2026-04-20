@@ -6,7 +6,6 @@
     if (!state.snake || state.snake.length === 0) return;
     const lvl = Dragon.levels.get(state.levelIdx);
     const theme = lvl.theme;
-    const phase = state.activeEffects.phase > 0;
     const ghost = state.activeEffects.ghost > 0;
     const len = state.snake.length;
 
@@ -32,7 +31,7 @@
       const hue = 20 + (1 - t) * 40 + lvl.level * 3;
       ctx.save();
       ctx.translate(px, py);
-      ctx.globalAlpha = phase ? 0.55 : (ghost ? 0.7 : 1);
+      ctx.globalAlpha = ghost ? 0.7 : 1;
       const r = CELL / 2 - 2 - t * 3;
       ctx.shadowColor = theme.glow;
       ctx.shadowBlur = 10;
@@ -71,7 +70,6 @@
     ctx.save();
     ctx.translate(hx, hy);
     ctx.rotate(headAng);
-    ctx.globalAlpha = phase ? 0.7 : 1;
     ctx.shadowColor = theme.glow;
     ctx.shadowBlur = 18;
 

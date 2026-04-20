@@ -417,10 +417,6 @@
       ctx.fillStyle = 'rgba(200,150,255,0.06)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
-    if (state.activeEffects.phase > 0) {
-      ctx.strokeStyle = 'rgba(94,227,255,0.2)'; ctx.lineWidth = 3;
-      ctx.strokeRect(0, 0, canvas.width, canvas.height);
-    }
     if (state.iframes > 0) {
       const pulse = 0.08 + Math.sin(performance.now() / 80) * 0.04;
       ctx.fillStyle = `rgba(255,230,180,${pulse})`;
