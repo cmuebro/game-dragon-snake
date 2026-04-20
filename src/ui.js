@@ -447,9 +447,17 @@
   }
 
   let _impressumPausedByDialog = false;
+  let _impressumPrevScreen = null;
   function showImpressum() {
     const s = Dragon.state;
     _impressumPausedByDialog = false;
+    _impressumPrevScreen = null;
+    for (const k of Object.keys(screens)) {
+      if (k !== 'impressum' && screens[k] && screens[k].classList.contains('show')) {
+        _impressumPrevScreen = k;
+        break;
+      }
+    }
     if (s.running && !s.paused) {
       s.paused = true;
       _impressumPausedByDialog = true;
@@ -459,7 +467,12 @@
   }
 
   function closeImpressum() {
-    hideAllScreens();
+    if (_impressumPrevScreen) {
+      showScreen(_impressumPrevScreen);
+    } else {
+      hideAllScreens();
+    }
+    _impressumPrevScreen = null;
     const s = Dragon.state;
     if (_impressumPausedByDialog && s.running) s.paused = false;
     _impressumPausedByDialog = false;
