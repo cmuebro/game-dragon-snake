@@ -35,6 +35,7 @@
 
     for (const f of state.fireballs) drawFireball(f);
     if (state.firestorms && state.firestorms.length) drawFirestorms(state);
+    if (state.boss) drawBoss(state, ts);
 
     Dragon.dragonRenderer.draw(ctx, state, ts);
 
@@ -363,6 +364,85 @@
     ctx.beginPath(); ctx.arc(0, 0, 8 * s, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#ffe27a';
     ctx.beginPath(); ctx.arc(0, 0, 4 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawBoss(state, ts) {
+    const b = state.boss;
+    if (!b) return;
+    ctx.save();
+    for (const seg of b.segments) {
+      const px = seg.x * CELL + CELL / 2;
+      const py = seg.y * CELL + CELL / 2;
+      ctx.fillStyle = '#4a2818';
+      ctx.shadowColor = '#7a1f28';
+      ctx.shadowBlur = 14;
+      ctx.fillRect(px - CELL / 2 + 1, py - CELL / 2 + 1, CELL - 2, CELL - 2);
+      ctx.fillStyle = '#3a1a0c';
+      ctx.fillRect(px - CELL / 2 + 4, py - CELL / 2 + 4, CELL - 8, CELL - 8);
+      const thornPulse = 0.6 + 0.4 * Math.sin(ts / 400 + seg.x * 0.7 + seg.y * 0.5);
+      ctx.fillStyle = `rgba(140, 50, 40, ${thornPulse})`;
+      ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI * 2); ctx.fill();
+    }
+    for (const wp of b.weakpoints) {
+      if (!wp.active) continue;
+      const px = (wp.px != null) ? wp.px : (wp.x * CELL + CELL / 2);
+      const py = (wp.py != null) ? wp.py : (wp.y * CELL + CELL / 2);
+      const pulse = 0.85 + 0.15 * Math.sin(ts / 300);
+      const radius = (CELL / 2 - 2) * pulse;
+      ctx.shadowColor = '#ffd060';
+      ctx.shadowBlur = 20;
+      const grad = ctx.createRadialGradient(px, py, 2, px, py, radius);
+      grad.addColorStop(0, '#fff4a8');
+      grad.addColorStop(0.5, '#ffd060');
+      grad.addColorStop(1, '#b88420');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(px, py, radius, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(60, 30, 10, 0.8)';
+      for (let i = 0; i < 5; i++) {
+        const a = (i / 5) * Math.PI * 2 - Math.PI / 2 + ts / 800;
+        ctx.beginPath();
+        ctx.arc(px + Math.cos(a) * radius * 0.55, py + Math.sin(a) * radius * 0.55, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    if (b.spores && b.spores.length) {
+      for (const sp of b.spores) {
+        const fade = Math.max(0.75, Math.min(1, sp.life / 800));
+        ctx.globalAlpha = fade;
+        const pulse = 0.9 + 0.15 * Math.sin(ts / 130 + sp.px * 0.1);
+
+        ctx.shadowColor = '#9fff5a';
+        ctx.shadowBlur = 32;
+        ctx.fillStyle = 'rgba(200, 255, 120, 0.35)';
+        ctx.beginPath(); ctx.arc(sp.px, sp.py, 14 * pulse, 0, Math.PI * 2); ctx.fill();
+
+        ctx.shadowColor = '#6cd02a';
+        ctx.shadowBlur = 22;
+        const r1 = 10 * pulse;
+        const grad = ctx.createRadialGradient(sp.px, sp.py, 1, sp.px, sp.py, r1);
+        grad.addColorStop(0, '#f2ffd0');
+        grad.addColorStop(0.45, '#9fff5a');
+        grad.addColorStop(1, '#3a7018');
+        ctx.fillStyle = grad;
+        ctx.beginPath(); ctx.arc(sp.px, sp.py, r1, 0, Math.PI * 2); ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(20, 50, 5, 0.9)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(sp.px, sp.py, r1, 0, Math.PI * 2); ctx.stroke();
+
+        ctx.fillStyle = 'rgba(20, 50, 5, 0.85)';
+        for (let i = 0; i < 5; i++) {
+          const a = (i / 5) * Math.PI * 2 + ts / 350;
+          ctx.beginPath();
+          ctx.arc(sp.px + Math.cos(a) * r1 * 0.55, sp.py + Math.sin(a) * r1 * 0.55, 1.7, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
     ctx.restore();
   }
 

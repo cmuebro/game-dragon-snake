@@ -21,6 +21,7 @@
       fireballs: [],
       firestorms: [],
       firestormAcc: 0,
+      boss: null,
       particles: [],
       floatTexts: [],
 

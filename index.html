@@ -22,6 +22,10 @@
         <span id="hudHpText">100 / 100</span>
       </div>
       <div class="hud-lives" id="hudLives"></div>
+      <div class="boss-hp-wrap" id="bossHpWrap">
+        <span class="boss-hp-label" id="bossHpLabel">Boss</span>
+        <div class="boss-hp-bar"><span id="bossHpFill" style="width:100%"></span></div>
+      </div>
       <div class="volume-wrap">
         <button class="corner-btn hud-music" id="btnMusic" title="Lautstärke" aria-label="Lautstärke">
           <span id="btnMusicIcon">🎵</span>
@@ -152,6 +156,21 @@
           <button class="btn" id="btnHsRestart">Neues Abenteuer</button>
           <button class="btn ghost" id="btnHsClose">Zum Start</button>
         </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="bossIntroScreen">
+      <div class="card boss-intro-card">
+        <div class="card-flourish">⚔</div>
+        <span class="level-chip pill-crimson">BOSS-KAMPF</span>
+        <h2 id="bossIntroTitle">—</h2>
+        <p class="tagline" id="bossIntroSubtitle">—</p>
+        <p id="bossIntroDesc">—</p>
+        <div class="boss-hint">
+          <span class="boss-hint-icon">✧</span>
+          <span class="boss-hint-text" id="bossIntroHint">—</span>
+        </div>
+        <button class="btn" id="btnBossStart">Kampf beginnen</button>
       </div>
     </div>
 
@@ -326,6 +345,7 @@
 <script src="src/items.js"></script>
 <script src="src/highscores.js"></script>
 <script src="src/abilities.js"></script>
+<script src="src/bosses.js"></script>
 <script src="src/shop.js"></script>
 <script src="src/levels.js"></script>
 <script src="src/world.js"></script>

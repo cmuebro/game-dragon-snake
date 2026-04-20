@@ -53,12 +53,22 @@
     const s = Dragon.state;
     const lvl = Dragon.levels.get(idx);
     s.levelIdx = idx;
-    s.snake = [
-      { x: Math.floor(W / 2),     y: Math.floor(H / 2) },
-      { x: Math.floor(W / 2) - 1, y: Math.floor(H / 2) },
-      { x: Math.floor(W / 2) - 2, y: Math.floor(H / 2) },
-      { x: Math.floor(W / 2) - 3, y: Math.floor(H / 2) },
-    ];
+    if (lvl.bossId) {
+      const sy = Math.floor(H / 2);
+      s.snake = [
+        { x: 6, y: sy },
+        { x: 5, y: sy },
+        { x: 4, y: sy },
+        { x: 3, y: sy },
+      ];
+    } else {
+      s.snake = [
+        { x: Math.floor(W / 2),     y: Math.floor(H / 2) },
+        { x: Math.floor(W / 2) - 1, y: Math.floor(H / 2) },
+        { x: Math.floor(W / 2) - 2, y: Math.floor(H / 2) },
+        { x: Math.floor(W / 2) - 3, y: Math.floor(H / 2) },
+      ];
+    }
     s.prevSnake = s.snake.map(seg => ({ x: seg.x, y: seg.y }));
     s.dir = { x: 1, y: 0 };
     s.nextDir = { x: 1, y: 0 };
@@ -100,13 +110,21 @@
     s.iframes = 0;
     s.shieldCd = 0;
     s.countdown = COUNTDOWN_MS;
-    Dragon.items.spawn(s, 'food');
-    if (lvl.level >= 3 && Math.random() < 0.7) Dragon.items.spawn(s, 'gem');
-    if (lvl.level >= 8 && Math.random() < 0.5) Dragon.items.spawn(s, 'coin');
+    s.boss = null;
+    if (lvl.bossId && Dragon.bosses) {
+      Dragon.bosses.start(s, lvl.bossId);
+    } else {
+      Dragon.items.spawn(s, 'food');
+      if (lvl.level >= 3 && Math.random() < 0.7) Dragon.items.spawn(s, 'gem');
+      if (lvl.level >= 8 && Math.random() < 0.5) Dragon.items.spawn(s, 'coin');
+    }
     Dragon.ui.updateStats(s);
     Dragon.ui.updateAbilityGrid(s);
     if (Dragon.audio && Dragon.audio.setMood && lvl.theme && lvl.theme.mood) {
       Dragon.audio.setMood(lvl.theme.mood);
+    }
+    if (lvl.bossId && Dragon.ui && Dragon.ui.showBossIntro) {
+      Dragon.ui.showBossIntro(lvl.bossId);
     }
   }
 
@@ -140,6 +158,7 @@
     if (state.spikes.some(s => s.x === c.x && s.y === c.y)) return true;
     if (state.rivals.some(r => r.segments.some(seg => seg.x === c.x && seg.y === c.y))) return true;
     if (state.snake.some(seg => seg.x === c.x && seg.y === c.y)) return true;
+    if (state.boss && state.boss.segments && state.boss.segments.some(s => s.x === c.x && s.y === c.y)) return true;
     return false;
   }
 
@@ -231,6 +250,14 @@
     if (hitRival) {
       takeDamage(s, DAMAGE.RIVAL_DRAGON, 'Rivaldrache');
       return;
+    }
+
+    if (s.boss && Dragon.bosses) {
+      const bossHit = Dragon.bosses.onHeadEntersCell(s, newHead);
+      if (bossHit === 'body') {
+        takeDamage(s, DAMAGE.RIVAL_DRAGON, s.boss.name);
+        return;
+      }
     }
 
     const body = s.snake.slice(0, -1);
@@ -490,6 +517,7 @@
         if (s.activeEffects.hammer > 0) updateHammer(s, dt);
         if (s.activeEffects.firestorm > 0) updateFirestorm(s, dt);
         if (s.firestorms && s.firestorms.length) updateFirestormProjectiles(s, dt);
+        if (s.boss && Dragon.bosses) Dragon.bosses.update(s, dt);
         const slow = s.activeEffects.slowtime > 0;
         s.timeScale = slow ? 0.6 : 1;
         const rivalScale = slow ? 0.45 : 1;

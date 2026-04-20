@@ -32,27 +32,31 @@
   function nameFor(i) { return NAMES[i] || `Prüfung ${i}`; }
   function subtitleFor(i) { return SUBTITLES[i] || ''; }
 
+  const BOSS_IDS = ['wurzelherz', 'magma-titan', 'tiefen-krake', 'schattenherr', 'urdrache'];
+
   function generate(count) {
     const arr = [];
     for (let i = 1; i <= count; i++) {
       const theme = Dragon.themes.forLevel(i);
-      const goal = 4 + Math.min(16, Math.floor(i * 0.5) + 2);
+      const baseGoal = 4 + Math.min(16, Math.floor(i * 0.5) + 2);
       const speed = 150 - Math.min(110, i * 2.8);
       const wallsBase = Math.min(68, 10 + Math.floor(i * 1.4));
-      const rivals = i >= 2 ? Math.min(5, 1 + Math.floor((i - 2) / 8)) : 0;
+      const normalRivals = i >= 2 ? Math.min(5, 1 + Math.floor((i - 2) / 8)) : 0;
       const spikeFields = i >= 15 ? Math.min(12, Math.floor((i - 13) / 3)) : 0;
       const isBoss = i % 10 === 0;
+      const bossId = isBoss ? BOSS_IDS[Math.min(BOSS_IDS.length - 1, Math.floor(i / 10) - 1)] : null;
       arr.push({
         level: i,
         name: nameFor(i),
         subtitle: subtitleFor(i),
         theme,
-        goal,
+        goal: isBoss ? 9999 : baseGoal,
         speed,
-        walls: isBoss ? wallsBase + 10 : wallsBase,
-        rivals,
-        spikeFields,
+        walls: isBoss ? Math.max(6, Math.floor(wallsBase * 0.4)) : wallsBase,
+        rivals: isBoss ? 0 : normalRivals,
+        spikeFields: isBoss ? 0 : spikeFields,
         isBoss,
+        bossId,
       });
     }
     return arr;

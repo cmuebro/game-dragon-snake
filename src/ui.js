@@ -5,7 +5,7 @@
 
   const screens = {
     start: null, shop: null, over: null, win: null, pause: null, cheat: null, impressum: null,
-    highscoreEntry: null, highscoreList: null,
+    highscoreEntry: null, highscoreList: null, bossIntro: null,
   };
 
   function init() {
@@ -18,6 +18,7 @@
     screens.impressum = el('impressumScreen');
     screens.highscoreEntry = el('highscoreEntryScreen');
     screens.highscoreList = el('highscoreListScreen');
+    screens.bossIntro = el('bossIntroScreen');
     buildAbilityGrid();
     wireButtons();
   }
@@ -163,9 +164,16 @@
     el('statScore').textContent   = state.score;
     el('statGems').textContent    = state.totalGems;
     el('statCoins').textContent   = state.totalCoins;
-    el('statGoal').textContent    = state.goalProgress;
-    el('statGoalMax').textContent = lvl.goal;
-    el('progressBar').style.width = Math.min(100, state.goalProgress / lvl.goal * 100) + '%';
+    if (lvl.bossId && state.boss) {
+      el('statGoal').textContent    = state.boss.hp;
+      el('statGoalMax').textContent = state.boss.maxHp;
+      const pct = Math.max(0, state.boss.hp / state.boss.maxHp * 100);
+      el('progressBar').style.width = pct + '%';
+    } else {
+      el('statGoal').textContent    = state.goalProgress;
+      el('statGoalMax').textContent = lvl.goal;
+      el('progressBar').style.width = Math.min(100, state.goalProgress / lvl.goal * 100) + '%';
+    }
     el('worldName').textContent   = lvl.theme.name;
     el('worldSpeed').textContent  = Math.round(1000 / lvl.speed) + ' f/s';
     const haz = [];
@@ -189,6 +197,20 @@
     const hpPct = Math.max(0, Math.min(100, state.hp / state.maxHp * 100));
     if (hpFill) hpFill.style.width = hpPct + '%';
     if (hpText) hpText.textContent = `${Math.ceil(state.hp)} / ${state.maxHp}`;
+
+    const bossWrap = el('bossHpWrap');
+    if (bossWrap) {
+      if (state.boss) {
+        bossWrap.classList.add('show');
+        const bossFill = el('bossHpFill');
+        const bossLabel = el('bossHpLabel');
+        const bossPct = Math.max(0, Math.min(100, state.boss.hp / state.boss.maxHp * 100));
+        if (bossFill) bossFill.style.width = bossPct + '%';
+        if (bossLabel) bossLabel.textContent = state.boss.name;
+      } else {
+        bossWrap.classList.remove('show');
+      }
+    }
 
     const livesEl = el('hudLives');
     if (livesEl && livesEl.dataset.count !== String(state.lives)) {
@@ -395,6 +417,7 @@
     }
     el('btnCheatClose').addEventListener('click', () => { closeCheat(); });
 
+    el('btnBossStart').addEventListener('click', () => { closeBossIntro(); });
     el('btnStartHighscores').addEventListener('click', () => { showHighscoreList(); });
     el('btnOverHighscore').addEventListener('click', () => {
       showHighscoreEntry(Dragon.state.score);
@@ -619,6 +642,23 @@
   }
   function escapeAttr(s) { return escapeHtml(s); }
 
+  function showBossIntro(bossId) {
+    const def = Dragon.bosses && Dragon.bosses.get ? Dragon.bosses.get(bossId) : null;
+    if (!def) return;
+    const s = Dragon.state;
+    s.paused = true;
+    el('bossIntroTitle').textContent = def.name;
+    el('bossIntroSubtitle').textContent = def.subtitle || '';
+    el('bossIntroDesc').textContent = def.intro || '';
+    el('bossIntroHint').textContent = def.hint || '';
+    showScreen('bossIntro');
+  }
+
+  function closeBossIntro() {
+    hideAllScreens();
+    Dragon.state.paused = false;
+  }
+
   let _pendingHighscoreScore = 0;
   function showHighscoreEntry(score) {
     _pendingHighscoreScore = Math.max(0, Math.floor(score || 0));
@@ -750,5 +790,6 @@
     closeCheat,
     showHighscoreEntry,
     showHighscoreList,
+    showBossIntro,
   };
 })(window.Dragon = window.Dragon || {});
