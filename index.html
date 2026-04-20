@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Drachen-Snake — 50 Level Abenteuer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=MedievalSharp&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="wrap">
+  <div id="stage">
+    <div class="top-hud" id="topHud">
+      <div class="hud-level">
+        <span class="hud-level-name" id="hudLevelName">Level 1 · Der erste Flug</span>
+        <span class="hud-theme-name" id="hudThemeName">Sonnenwiese</span>
+      </div>
+      <div class="hud-hp-wrap">
+        <div class="hud-hp-bar"><span id="hudHpFill" style="width:100%"></span></div>
+        <span id="hudHpText">100 / 100</span>
+      </div>
+      <div class="hud-lives" id="hudLives"></div>
+      <button class="corner-btn hud-music" id="btnMusic" title="Musik an/aus" aria-label="Musik">
+        <span id="btnMusicIcon">🎵</span>
+      </button>
+      <button class="corner-btn hud-pause" id="btnPause" title="Pause (P)" aria-label="Pause">
+        <span id="btnPauseIcon">⏸</span>
+      </button>
+    </div>
+
+    <canvas id="game" width="720" height="720"></canvas>
+
+    <div class="ability-bar" id="abilityBar"></div>
+
+    <div class="floating-joystick" id="floatJoystick">
+      <div class="fj-base"></div>
+      <div class="fj-handle"></div>
+    </div>
+
+    <div class="overlay show" id="startScreen">
+      <div class="card">
+        <div class="card-flourish">❦</div>
+        <h2>Drachen-Snake</h2>
+        <p class="tagline">Eine Chronik in fünfzig Prüfungen</p>
+        <p>Führe deinen Drachen durch 50 gefährliche Reiche. Sammle Münzen, handle beim Marktplatz und werde zur Legende.</p>
+        <div class="reward">
+          <span class="icon">❦</span>
+          Nach jedem Level öffnet der <b>Marktplatz</b>.<br>
+          Tausche 🪙 Münzen gegen Fähigkeiten und Tränke.
+        </div>
+        <p class="hint">Pfeiltasten / WASD — Bewegen · Leertaste / Shift — Fähigkeiten · P — Pause<br>Auf Touch & Touchpad: Ziehe auf dem Canvas wie an einem Joystick.</p>
+        <button class="btn" id="btnStart">Abenteuer beginnen</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="shopScreen">
+      <div class="card shop-card">
+        <div class="card-flourish">❦</div>
+        <span class="level-chip" id="shopChip">LEVEL GESCHAFFT</span>
+        <h2 id="shopTitle">—</h2>
+        <p class="tagline" id="shopSubtitle">—</p>
+        <p id="shopDesc">—</p>
+        <div class="shop-summary" id="shopSummary"></div>
+
+        <div class="shop-header">
+          <span class="shop-decor">— Marktplatz —</span>
+          <span class="shop-purse">Börse: 🪙 <b id="shopCoins">0</b></span>
+        </div>
+
+        <div class="shop-grid" id="shopGrid"></div>
+
+        <button class="btn" id="btnShopNext">Reise fortsetzen →</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="gameOverScreen">
+      <div class="card">
+        <div class="card-flourish">✟</div>
+        <h2 class="h-dark">Dein Drache ist gefallen</h2>
+        <p id="deathMsg">Der Pfad endet hier... vorerst.</p>
+        <div class="reward">
+          <div class="row"><span class="label">Erreichtes Level</span><span class="val" id="goLevel">1</span></div>
+          <div class="row"><span class="label">Punkte</span><span class="val" id="goScore">0</span></div>
+          <div class="row"><span class="label">Juwelen gesammelt</span><span class="val" id="goGems">0</span></div>
+          <div class="row"><span class="label">Münzen</span><span class="val" id="goCoins">0</span></div>
+        </div>
+        <button class="btn" id="btnRetry">Neuer Versuch</button>
+        <button class="btn ghost" id="btnFromStart">Von Level 1</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="winScreen">
+      <div class="card">
+        <div class="card-flourish">♛</div>
+        <h2>LEGENDE</h2>
+        <p>Du hast alle fünfzig Prüfungen gemeistert.<br>Der Drachenthron gehört dir.</p>
+        <div class="reward">
+          <span class="icon">♛</span>
+          Endstand: <b id="winScore">0</b> Punkte<br>
+          <span class="accent-text">💎 <span id="winGems">0</span> · 🪙 <span id="winCoins">0</span></span>
+        </div>
+        <button class="btn" id="btnRestart">Neues Spiel</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="pauseScreen">
+      <div class="card">
+        <div class="card-flourish">⏸</div>
+        <h2>Pause</h2>
+        <p>Tippe irgendwo · drücke P oder Leertaste um weiterzuspielen.</p>
+      </div>
+    </div>
+
+    <div class="overlay" id="impressumScreen">
+      <div class="card impressum-card">
+        <div class="card-flourish">❦</div>
+        <h2>Impressum</h2>
+        <p class="tagline">Angaben gemäß § 5 TMG</p>
+
+        <div class="impressum-body">
+          <h3 class="impressum-section-title">Anbieter</h3>
+          <p>
+            Christoph Müller-Brodmann<br>
+            Buchenweg 8<br>
+            35096 Weimar (Lahn)<br>
+            Deutschland
+          </p>
+
+          <h3 class="impressum-section-title">Kontakt</h3>
+          <p>
+            E-Mail: postmaster@mueller-brodmann.de<br>
+            Telefon: 06424/3690748
+          </p>
+
+          <h3 class="impressum-section-title">Inhaltlich verantwortlich nach § 18 Abs. 2 MStV</h3>
+          <p>
+            Christoph Müller-Brodmann<br>
+            Anschrift wie oben
+          </p>
+
+          <h3 class="impressum-section-title">Haftung für Inhalte</h3>
+          <p>
+            Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte auf
+            diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach
+            §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet,
+            übermittelte oder gespeicherte fremde Informationen zu überwachen oder
+            nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
+            Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen
+            nach den allgemeinen Gesetzen bleiben hiervon unberührt.
+          </p>
+
+          <h3 class="impressum-section-title">Haftung für Links</h3>
+          <p>
+            Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren
+            Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden
+            Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten
+            Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten
+            verantwortlich.
+          </p>
+
+          <h3 class="impressum-section-title">Urheberrecht</h3>
+          <p>
+            Die durch den Seitenbetreiber erstellten Inhalte und Werke unterliegen
+            dem deutschen Urheberrecht. Beiträge Dritter sind als solche
+            gekennzeichnet. Die Vervielfältigung, Bearbeitung, Verbreitung und jede
+            Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen
+            der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.
+          </p>
+
+          <h3 class="impressum-section-title">Streitschlichtung</h3>
+          <p>
+            Die Europäische Kommission stellt eine Plattform zur
+            Online-Streitbeilegung (OS) bereit:
+            <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr/</a>.
+            Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren
+            vor einer Verbraucherschlichtungsstelle teilzunehmen.
+          </p>
+
+          <h3 class="impressum-section-title">Musik &amp; Quellenangaben</h3>
+          <p class="impressum-music-intro">
+            Die im Spiel verwendete Hintergrundmusik stammt von folgenden
+            Urheberinnen und Urhebern. Herzlichen Dank für die Bereitstellung.
+          </p>
+          <ul class="impressum-songs" id="impressumSongs"></ul>
+        </div>
+
+        <button class="btn" id="btnImpressumClose">Schließen</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="cheatScreen">
+      <div class="card cheat-card">
+        <div class="card-flourish">🔮</div>
+        <h2>Drachenmagie</h2>
+        <p class="tagline">Test-Werkzeug</p>
+
+        <h3 class="cheat-section-title">Fähigkeiten (max. Stufe)</h3>
+        <div class="cheat-abilities" id="cheatAbilities"></div>
+
+        <h3 class="cheat-section-title">Ressourcen</h3>
+        <div class="cheat-resources">
+          <button class="cheat-res-btn" id="cheatCoins">+500 🪙</button>
+          <button class="cheat-res-btn" id="cheatHp">Voll heilen</button>
+          <button class="cheat-res-btn" id="cheatLives">+1 Leben</button>
+          <button class="cheat-res-btn" id="cheatShortCd">CD: Default</button>
+          <button class="cheat-res-btn" id="cheatReset">Reset Run</button>
+        </div>
+
+        <h3 class="cheat-section-title">Level wählen</h3>
+        <div class="cheat-levels" id="cheatLevels"></div>
+
+        <button class="btn" id="btnCheatClose">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <aside id="side">
+    <h1>Drachen-Snake</h1>
+    <p class="motto">— Chronik in fünfzig Prüfungen —</p>
+
+    <div class="panel">
+      <div class="row"><span class="label">Punkte</span><span class="val" id="statScore">0</span></div>
+      <div class="row"><span class="label">Juwelen</span><span class="val" id="statGems">0</span></div>
+      <div class="row"><span class="label">🪙 Münzen</span><span class="val" id="statCoins">0</span></div>
+      <div class="row"><span class="label">Fortschritt</span><span class="val"><span id="statGoal">0</span>/<span id="statGoalMax">5</span></span></div>
+      <div class="bar"><span id="progressBar" style="width:0%"></span></div>
+    </div>
+
+    <div class="panel">
+      <div class="row"><span class="label label-head">Passive Fähigkeiten</span><span class="val hint-small" id="abilityHint">dauerhaft wirksam</span></div>
+      <div class="abilities" id="abilityGrid"></div>
+    </div>
+
+    <div class="panel">
+      <div class="row"><span class="label label-head">Aktuelle Welt</span></div>
+      <div class="row"><span class="label">Thema</span><span class="val" id="worldName">—</span></div>
+      <div class="row"><span class="label">Tempo</span><span class="val" id="worldSpeed">—</span></div>
+      <div class="row"><span class="label">Gefahren</span><span class="val" id="worldHazard">—</span></div>
+    </div>
+
+    <div class="panel controls">
+      <b>Steuerung</b><br>
+      ⬅⬆⬇➡ / WASD — Bewegung<br>
+      <b>Leertaste</b> — Hauptfähigkeit<br>
+      <b>Shift</b> — Sekundärfähigkeit<br>
+      <b>P</b> — Pause · <b>R</b> — Neustart
+    </div>
+
+    <div class="panel controls">
+      <b>Beute</b><br>
+      🍎 Frucht — Grundnahrung<br>
+      💎 Juwel — +50 Punkte<br>
+      🪙 Münze — Währung<br>
+      ⭐ Stern — Seltener Schatz<br>
+      ❤ Herz — Extra-Leben
+    </div>
+  </aside>
+
+  <button class="corner-btn corner-btn-fixed" id="btnInfo" title="Impressum" aria-label="Impressum">
+    <span class="info-icon">i</span>
+  </button>
+</div>
+
+<script src="music/songs.csv.js" onerror="this.dataset.missing='1'"></script>
+<script src="src/config.js"></script>
+<script src="src/themes.js"></script>
+<script src="src/state.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/particles.js"></script>
+<script src="src/items.js"></script>
+<script src="src/abilities.js"></script>
+<script src="src/shop.js"></script>
+<script src="src/levels.js"></script>
+<script src="src/world.js"></script>
+<script src="src/rivals.js"></script>
+<script src="src/decorations.js"></script>
+<script src="src/input.js"></script>
+<script src="src/render-dragon.js"></script>
+<script src="src/render.js"></script>
+<script src="src/ui.js"></script>
+<script src="src/game.js"></script>
+</body>
+</html>
