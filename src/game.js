@@ -330,23 +330,32 @@
 
   function updateHammer(s, dt) {
     const tier = Dragon.abilities.levelOf(s, 'hammer');
-    const rotSpeed = tier >= 3 ? 0.0075 : 0.0045;
+    const rotSpeed = tier >= 3 ? 0.01215 : tier >= 2 ? 0.00945 : 0.00765;
     s.hammerAngle = (s.hammerAngle || 0) + dt * rotSpeed;
     const head = s.snake[0];
     if (!head) return;
     const CELL = Dragon.config.CELL;
-    const radius = (tier >= 2 ? 2.5 : 1.8) * CELL;
-    const px = head.x * CELL + CELL / 2 + Math.cos(s.hammerAngle) * radius;
-    const py = head.y * CELL + CELL / 2 + Math.sin(s.hammerAngle) * radius;
-    const gx = Math.floor(px / CELL);
-    const gy = Math.floor(py / CELL);
-    const cx = ((gx % W) + W) % W;
-    const cy = ((gy % H) + H) % H;
-    const key = cx + ',' + cy;
+    const radius = (tier >= 2 ? 2.5 : 1.8) * 1.7 * CELL;
+    const headPx = head.x * CELL + CELL / 2;
+    const headPy = head.y * CELL + CELL / 2;
+    const ca = Math.cos(s.hammerAngle);
+    const sa = Math.sin(s.hammerAngle);
+    const steps = Math.max(2, Math.ceil(radius / (CELL * 0.5)));
     const now = performance.now();
-    if ((now - (s.hammerHitLog[key] || 0)) > 300) {
-      s.hammerHitLog[key] = now;
-      processHammerHit(s, cx, cy);
+    const seen = new Set();
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      const gx = Math.floor((headPx + ca * radius * t) / CELL);
+      const gy = Math.floor((headPy + sa * radius * t) / CELL);
+      const cx = ((gx % W) + W) % W;
+      const cy = ((gy % H) + H) % H;
+      const key = cx + ',' + cy;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      if ((now - (s.hammerHitLog[key] || 0)) > 300) {
+        s.hammerHitLog[key] = now;
+        processHammerHit(s, cx, cy);
+      }
     }
   }
 

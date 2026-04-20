@@ -556,7 +556,7 @@
     const cx = vx * CELL + CELL / 2;
     const cy = vy * CELL + CELL / 2;
     const tier = Dragon.abilities.levelOf(state, 'hammer');
-    const radius = (tier >= 2 ? 2.5 : 1.8) * CELL;
+    const radius = (tier >= 2 ? 2.5 : 1.8) * 1.7 * CELL;
     const ang = state.hammerAngle || 0;
     const hx = cx + Math.cos(ang) * radius;
     const hy = cy + Math.sin(ang) * radius;
