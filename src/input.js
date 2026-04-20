@@ -22,6 +22,8 @@
 
   function onKeyDown(e) {
     const state = Dragon.state;
+    const tag = document.activeElement && document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
     keys[e.key.toLowerCase()] = true;
     const k = e.key.toLowerCase();
     const d = state.dir;

@@ -5,6 +5,7 @@
 
   const screens = {
     start: null, shop: null, over: null, win: null, pause: null, cheat: null, impressum: null,
+    highscoreEntry: null, highscoreList: null,
   };
 
   function init() {
@@ -15,6 +16,8 @@
     screens.pause = el('pauseScreen');
     screens.cheat = el('cheatScreen');
     screens.impressum = el('impressumScreen');
+    screens.highscoreEntry = el('highscoreEntryScreen');
+    screens.highscoreList = el('highscoreListScreen');
     buildAbilityGrid();
     wireButtons();
   }
@@ -243,7 +246,7 @@
 
     addShopSection(grid, 'Aktive Fähigkeiten', offers.active, 'ability', state);
     addShopSection(grid, 'Passive Fähigkeiten', offers.passive, 'ability', state);
-    addShopSection(grid, 'Alchemistische Tränke', offers.consumables, 'consumable', state);
+    addShopSection(grid, 'Alchemistische Gegenstände', offers.consumables, 'consumable', state);
   }
 
   function addShopSection(grid, title, list, kind, state) {
@@ -269,24 +272,53 @@
       if (!affordable && !fully) classes += ' poor';
       tile.className = classes;
 
+      const scoreLocked = nextTier && nextTier.scoreLocked;
+      if (scoreLocked) classes += ' score-locked';
+      tile.className = classes;
+
       const tierLabel = offer.maxLevel > 1
         ? `<div class="shop-tier">Stufe ${offer.currentLevel} / ${offer.maxLevel}</div>`
         : '';
-      const desc = fully
-        ? 'Voll erlernt — keine weiteren Stufen.'
-        : (offer.currentLevel === 0 ? offer.baseDesc : nextTier.desc);
+
+      let descBlock;
+      if (offer.currentLevel === 0) {
+        descBlock = `<div class="shop-desc">${offer.baseDesc}</div>`;
+      } else if (fully) {
+        descBlock = `
+          <div class="shop-desc-block">
+            <div class="shop-desc-label">Aktuell (voll erlernt)</div>
+            <div class="shop-desc-text">${offer.currentDesc}</div>
+          </div>
+        `;
+      } else {
+        descBlock = `
+          <div class="shop-desc-block">
+            <div class="shop-desc-label">Aktuell</div>
+            <div class="shop-desc-text">${offer.currentDesc}</div>
+          </div>
+          <div class="shop-desc-block shop-desc-next">
+            <div class="shop-desc-label">Nächste Stufe</div>
+            <div class="shop-desc-text">${nextTier.desc}</div>
+          </div>
+        `;
+      }
+
       const priceHtml = nextTier ? `🪙 ${nextTier.price}` : '—';
-      const btnLabel = fully
-        ? '✓ Voll erlernt'
-        : (offer.currentLevel === 0
-          ? (affordable ? 'Erlernen' : 'zu teuer')
-          : (affordable ? `Stufe ${nextTier.tierNum} freischalten` : 'zu teuer'));
+      const lockHint = scoreLocked
+        ? `<div class="shop-lock">🔒 Ab ${nextTier.minScore} Punkten (aktuell ${state.score})</div>`
+        : '';
+      let btnLabel;
+      if (fully) btnLabel = '✓ Voll erlernt';
+      else if (scoreLocked) btnLabel = 'Gesperrt';
+      else if (offer.currentLevel === 0) btnLabel = affordable ? 'Erlernen' : 'zu teuer';
+      else btnLabel = affordable ? `Stufe ${nextTier.tierNum} freischalten` : 'zu teuer';
 
       tile.innerHTML = `
         <div class="shop-icon">${offer.icon}</div>
         <div class="shop-name">${offer.name}</div>
         ${tierLabel}
-        <div class="shop-desc">${desc}</div>
+        ${descBlock}
+        ${lockHint}
         <div class="shop-price">${priceHtml}</div>
         <button class="shop-buy">${btnLabel}</button>
       `;
@@ -363,6 +395,31 @@
     }
     el('btnCheatClose').addEventListener('click', () => { closeCheat(); });
 
+    el('btnStartHighscores').addEventListener('click', () => { showHighscoreList(); });
+    el('btnOverHighscore').addEventListener('click', () => {
+      showHighscoreEntry(Dragon.state.score);
+    });
+    el('btnWinHighscore').addEventListener('click', () => {
+      showHighscoreEntry(Dragon.state.score);
+    });
+    el('btnHsSave').addEventListener('click', () => {
+      const name = el('hsNameInput').value;
+      Dragon.highscores.add(name, _pendingHighscoreScore);
+      showHighscoreList();
+    });
+    el('btnHsSkip').addEventListener('click', () => { showHighscoreList(); });
+    el('btnHsRestart').addEventListener('click', () => {
+      hideAllScreens();
+      Dragon.game.start(0);
+    });
+    el('btnHsClose').addEventListener('click', () => { showScreen('start'); });
+    el('hsNameInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        el('btnHsSave').click();
+      }
+    });
+
     el('btnInfo').addEventListener('click', () => { showImpressum(); });
     el('btnImpressumClose').addEventListener('click', () => { closeImpressum(); });
     el('impressumScreen').addEventListener('click', (e) => {
@@ -418,6 +475,10 @@
       Dragon.state.totalCoins += 500;
       updateStats(Dragon.state);
     });
+    el('cheatScore').addEventListener('click', () => {
+      Dragon.state.score += 500;
+      updateStats(Dragon.state);
+    });
     el('cheatHp').addEventListener('click', () => {
       Dragon.state.hp = Dragon.state.maxHp;
       updateStats(Dragon.state);
@@ -426,6 +487,12 @@
       const s = Dragon.state;
       if (s.lives < Dragon.config.MAX_LIVES) s.lives++;
       updateStats(s);
+    });
+    el('cheatComplete').addEventListener('click', () => {
+      const s = Dragon.state;
+      if (!s.running) return;
+      closeCheat();
+      Dragon.game.levelComplete();
     });
     el('cheatReset').addEventListener('click', () => {
       const keepLevel = Dragon.state.levelIdx || 0;
@@ -452,18 +519,35 @@
     btn.classList.toggle('cheat-active', !!Dragon.state.cheatShortCd);
   }
 
+  let _cheatPrevScreen = null;
   function showCheatMenu() {
     const s = Dragon.state;
     if (s.running) s.paused = true;
+    _cheatPrevScreen = null;
+    for (const k of Object.keys(screens)) {
+      if (k !== 'cheat' && screens[k] && screens[k].classList.contains('show')) {
+        _cheatPrevScreen = k;
+        break;
+      }
+    }
     renderCheatAbilities(s);
+    renderCheatConsumables(s);
     renderCheatLevels(s);
     updateShortCdLabel();
     showScreen('cheat');
   }
 
   function closeCheat() {
-    hideAllScreens();
     const s = Dragon.state;
+    if (_cheatPrevScreen === 'shop') {
+      renderShopGrid(s);
+      showScreen('shop');
+    } else if (_cheatPrevScreen) {
+      showScreen(_cheatPrevScreen);
+    } else {
+      hideAllScreens();
+    }
+    _cheatPrevScreen = null;
     if (s.running) s.paused = false;
   }
 
@@ -535,8 +619,46 @@
   }
   function escapeAttr(s) { return escapeHtml(s); }
 
+  let _pendingHighscoreScore = 0;
+  function showHighscoreEntry(score) {
+    _pendingHighscoreScore = Math.max(0, Math.floor(score || 0));
+    el('hsEntryScore').textContent = _pendingHighscoreScore;
+    const input = el('hsNameInput');
+    input.value = '';
+    showScreen('highscoreEntry');
+    setTimeout(() => input.focus(), 60);
+  }
+
+  function showHighscoreList() {
+    const entries = Dragon.highscores.list();
+    const ol = el('hsList');
+    const empty = el('hsEmpty');
+    ol.innerHTML = '';
+    if (!entries.length) {
+      empty.hidden = false;
+    } else {
+      empty.hidden = true;
+      entries.forEach((entry, i) => {
+        const li = document.createElement('li');
+        const d = new Date(entry.date);
+        const dateStr = isNaN(d.getTime())
+          ? ''
+          : `${d.toLocaleDateString('de-DE')} ${d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`;
+        li.innerHTML = `
+          <span class="hs-rank">${i + 1}.</span>
+          <span class="hs-name">${escapeHtml(entry.name) || '<em>ohne Namen</em>'}</span>
+          <span class="hs-score">${entry.score}</span>
+          <span class="hs-date">${dateStr}</span>
+        `;
+        ol.appendChild(li);
+      });
+    }
+    showScreen('highscoreList');
+  }
+
   function renderCheatAbilities(state) {
     const grid = el('cheatAbilities');
+    if (!grid) return;
     grid.innerHTML = '';
     for (const a of Dragon.abilities.list) {
       const level = Dragon.abilities.levelOf(state, a.id);
@@ -574,6 +696,27 @@
     }
   }
 
+  function renderCheatConsumables(state) {
+    const grid = el('cheatConsumables');
+    if (!grid) return;
+    grid.innerHTML = '';
+    const list = (Dragon.shop && Dragon.shop.consumables) || [];
+    for (const c of list) {
+      const btn = document.createElement('button');
+      btn.className = 'cheat-res-btn';
+      const isActive = (c.id === 'runestone' && state.buffs.halvedCooldowns);
+      if (isActive) btn.classList.add('cheat-active');
+      btn.textContent = `${c.icon} ${c.name}`;
+      btn.title = c.desc;
+      btn.addEventListener('click', () => {
+        c.buy(state);
+        renderCheatConsumables(state);
+        updateStats(state);
+      });
+      grid.appendChild(btn);
+    }
+  }
+
   function renderCheatLevels(state) {
     const container = el('cheatLevels');
     container.innerHTML = '';
@@ -605,5 +748,7 @@
     showWin,
     showCheatMenu,
     closeCheat,
+    showHighscoreEntry,
+    showHighscoreList,
   };
 })(window.Dragon = window.Dragon || {});

@@ -417,6 +417,7 @@
       coinsEarned *= 2;
       s.buffs.doubleCoins = false;
     }
+    if (s.buffs.halvedCooldowns) s.buffs.halvedCooldowns = false;
     s.totalCoins += coinsEarned;
 
     Dragon.ui.updateStats(s);
@@ -515,7 +516,7 @@
     requestAnimationFrame(loop);
   }
 
-  Dragon.game = { boot, start, nextLevel, retry, togglePause, restart, loadLevel, step, takeDamage, goToLevel };
+  Dragon.game = { boot, start, nextLevel, retry, togglePause, restart, loadLevel, step, takeDamage, goToLevel, levelComplete };
 
   document.addEventListener('DOMContentLoaded', boot);
 })(window.Dragon = window.Dragon || {});

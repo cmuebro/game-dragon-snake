@@ -23,12 +23,12 @@
   });
 
   registerConsumable({
-    id: 'double_coins',
-    icon: '🪙', name: 'Segensspruch',
-    desc: 'Verdoppelt Bonus-Münzen am Ende des nächsten Levels.',
+    id: 'runestone',
+    icon: '🪨', name: 'Runenstein',
+    desc: 'Halbiert alle Fähigkeiten-Abklingzeiten im nächsten Level.',
     price: 80,
-    canBuy(state) { return !state.buffs.doubleCoins; },
-    buy(state) { state.buffs.doubleCoins = true; },
+    canBuy(state) { return !state.buffs.halvedCooldowns; },
+    buy(state) { state.buffs.halvedCooldowns = true; },
   });
 
   function abilityOffer(state, a) {
@@ -36,21 +36,41 @@
     const max = Dragon.abilities.maxLevel(a);
     const fullyLeveled = level >= max;
     let nextTier = null;
+    let scoreLocked = false;
+    let scoreRequired = 0;
     if (!fullyLeveled) {
       const info = Dragon.abilities.tierInfo(a, level + 1);
-      if (info) nextTier = { desc: info.desc, price: info.price, tierNum: level + 1 };
+      if (info) {
+        scoreRequired = info.minScore || 0;
+        scoreLocked = scoreRequired > 0 && state.score < scoreRequired;
+        nextTier = {
+          desc: info.desc,
+          price: info.price,
+          tierNum: level + 1,
+          minScore: scoreRequired,
+          scoreLocked,
+        };
+      }
+    }
+    let currentDesc = null;
+    if (level >= 1) {
+      const cur = Dragon.abilities.tierInfo(a, level);
+      if (cur) currentDesc = cur.desc;
     }
     return {
       id: a.id,
       icon: a.icon,
       name: a.name,
       baseDesc: a.desc,
+      currentDesc,
       currentLevel: level,
       maxLevel: max,
       nextTier,
       fullyLeveled,
       owned: level >= 1,
-      affordable: nextTier ? state.totalCoins >= nextTier.price : false,
+      affordable: nextTier ? (state.totalCoins >= nextTier.price && !scoreLocked) : false,
+      scoreLocked,
+      scoreRequired,
       slot: a.slot,
     };
   }
@@ -84,6 +104,7 @@
       const nextTier = level + 1;
       const info = Dragon.abilities.tierInfo(a, nextTier);
       if (!info) return false;
+      if (info.minScore && state.score < info.minScore) return false;
       if (state.totalCoins < info.price) return false;
       state.totalCoins -= info.price;
       state.abilityLevels[id] = nextTier;

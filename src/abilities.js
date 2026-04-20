@@ -82,7 +82,7 @@
     cooldown: 6000,
     upgrades: [
       { desc: '+ Doppelte Reichweite (12 Felder).', price: 130 },
-      { desc: '+ 3 Felder breit.', price: 220 },
+      { desc: '+ 3 Felder breit.', price: 220, minScore: 6000 },
     ],
     activate(state) { shootFire(state); },
   });
@@ -117,8 +117,8 @@
     desc: 'Schwingt 7s im Kreis um den Drachen, trifft Gegner.',
     cooldown: 60000,
     upgrades: [
-      { desc: '+ Größerer Radius, zertrümmert auch Stacheln und Wände.', price: 200 },
-    { desc: '+ Dreht sich deutlich schneller.', price: 280 },
+      { desc: '+ Größerer Radius, zertrümmert auch Stacheln und Wände.', price: 200, minScore: 2000 },
+      { desc: '+ Dreht sich deutlich schneller.', price: 280, minScore: 8000 },
     ],
     activate(state) {
       state.activeEffects.hammer = 7000;
@@ -135,8 +135,8 @@
     desc: 'Shift: 3s lang speit jedes Körpersegment Feuerbälle in alle Richtungen.',
     cooldown: 60000,
     upgrades: [
-      { desc: '+ Schnellere und dichtere Feuerbälle.', price: 220 },
-      { desc: '+ Noch dichter, zerstört zusätzlich Wände & Stacheln.', price: 300 },
+      { desc: '+ Schnellere und dichtere Feuerbälle.', price: 220, minScore: 5000 },
+      { desc: '+ Noch dichter, zerstört zusätzlich Wände & Stacheln.', price: 300, minScore: 12000 },
     ],
     activate(state) {
       state.activeEffects.firestorm = 3000;
@@ -173,7 +173,7 @@
     cooldown: 0,
     upgrades: [
       { desc: '+ Verlangsamt um insgesamt 40%.', price: 160 },
-      { desc: '+ Verlangsamt um insgesamt 60%.', price: 250 },
+      { desc: '+ Verlangsamt um insgesamt 60%.', price: 250, minScore: 10000 },
     ],
   });
 
@@ -205,9 +205,9 @@
   function maxLevel(a) { return 1 + ((a.upgrades && a.upgrades.length) || 0); }
 
   function tierInfo(a, tier) {
-    if (tier === 1) return { desc: a.desc, price: a.price };
+    if (tier === 1) return { desc: a.desc, price: a.price, minScore: 0 };
     const up = (a.upgrades || [])[tier - 2];
-    return up ? { desc: up.desc, price: up.price } : null;
+    return up ? { desc: up.desc, price: up.price, minScore: up.minScore || 0 } : null;
   }
 
   function currentForSlot(state, slot) {
@@ -231,7 +231,8 @@
     if ((state.cooldown[id] || 0) > 0) return false;
     const result = a.activate(state);
     if (result === false) return false;
-    state.cooldown[id] = state.cheatShortCd ? 3000 : a.cooldown;
+    const mult = state.buffs && state.buffs.halvedCooldowns ? 0.5 : 1;
+    state.cooldown[id] = state.cheatShortCd ? 3000 : Math.round(a.cooldown * mult);
     return true;
   }
 

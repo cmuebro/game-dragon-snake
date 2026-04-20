@@ -63,6 +63,7 @@
         </div>
         <p class="hint">Pfeiltasten / WASD — Bewegen · Leertaste / Shift — Fähigkeiten · P — Pause<br>Auf Touch & Touchpad: Ziehe auf dem Canvas wie an einem Joystick.</p>
         <button class="btn" id="btnStart">Abenteuer beginnen</button>
+        <button class="btn ghost" id="btnStartHighscores">Bestenliste</button>
       </div>
     </div>
 
@@ -98,6 +99,7 @@
           <div class="row"><span class="label">Münzen</span><span class="val" id="goCoins">0</span></div>
         </div>
         <button class="btn" id="btnRetry">Neuer Versuch</button>
+        <button class="btn" id="btnOverHighscore">In Bestenliste eintragen</button>
         <button class="btn ghost" id="btnFromStart">Von Level 1</button>
       </div>
     </div>
@@ -113,6 +115,43 @@
           <span class="accent-text">💎 <span id="winGems">0</span> · 🪙 <span id="winCoins">0</span></span>
         </div>
         <button class="btn" id="btnRestart">Neues Spiel</button>
+        <button class="btn" id="btnWinHighscore">In Bestenliste eintragen</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="highscoreEntryScreen">
+      <div class="card">
+        <div class="card-flourish">📜</div>
+        <h2>Chronik der Drachen</h2>
+        <p class="tagline">Trage dich in die Bestenliste ein</p>
+        <div class="hs-entry-score">
+          <span class="hs-entry-label">Deine Punkte</span>
+          <span class="hs-entry-value" id="hsEntryScore">0</span>
+        </div>
+        <label class="hs-entry-name-label" for="hsNameInput">Name (max. 16 Zeichen)</label>
+        <input type="text" id="hsNameInput" class="hs-name-input" maxlength="16" placeholder="Namenloser Drache">
+        <div class="hs-entry-actions">
+          <button class="btn" id="btnHsSave">Eintragen</button>
+          <button class="btn ghost" id="btnHsSkip">Nicht eintragen</button>
+        </div>
+        <p class="hs-disclaimer">
+          Name, Punkte und Zeitpunkt werden ausschließlich lokal in deinem Browser gespeichert.
+          Mit dem Eintragen erklärst du dich damit einverstanden.
+        </p>
+      </div>
+    </div>
+
+    <div class="overlay" id="highscoreListScreen">
+      <div class="card hs-list-card">
+        <div class="card-flourish">🏆</div>
+        <h2>Bestenliste</h2>
+        <p class="tagline">Die Chronik der fünfzehn besten Drachen</p>
+        <ol class="hs-list" id="hsList"></ol>
+        <p class="hs-empty" id="hsEmpty" hidden>Noch keine Einträge. Werde die oder der erste!</p>
+        <div class="hs-list-actions">
+          <button class="btn" id="btnHsRestart">Neues Abenteuer</button>
+          <button class="btn ghost" id="btnHsClose">Zum Start</button>
+        </div>
       </div>
     </div>
 
@@ -206,15 +245,20 @@
         <h2>Drachenmagie</h2>
         <p class="tagline">Test-Werkzeug</p>
 
-        <h3 class="cheat-section-title">Fähigkeiten (max. Stufe)</h3>
+        <h3 class="cheat-section-title">Fähigkeiten</h3>
         <div class="cheat-abilities" id="cheatAbilities"></div>
+
+        <h3 class="cheat-section-title">Alchemistische Gegenstände</h3>
+        <div class="cheat-consumables" id="cheatConsumables"></div>
 
         <h3 class="cheat-section-title">Ressourcen</h3>
         <div class="cheat-resources">
           <button class="cheat-res-btn" id="cheatCoins">+500 🪙</button>
+          <button class="cheat-res-btn" id="cheatScore">+500 Punkte</button>
           <button class="cheat-res-btn" id="cheatHp">Voll heilen</button>
           <button class="cheat-res-btn" id="cheatLives">+1 Leben</button>
           <button class="cheat-res-btn" id="cheatShortCd">CD: Default</button>
+          <button class="cheat-res-btn" id="cheatComplete">Level abschließen</button>
           <button class="cheat-res-btn" id="cheatReset">Reset Run</button>
         </div>
 
@@ -280,6 +324,7 @@
 <script src="src/audio.js"></script>
 <script src="src/particles.js"></script>
 <script src="src/items.js"></script>
+<script src="src/highscores.js"></script>
 <script src="src/abilities.js"></script>
 <script src="src/shop.js"></script>
 <script src="src/levels.js"></script>
