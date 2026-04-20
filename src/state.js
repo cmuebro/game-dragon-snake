@@ -19,6 +19,8 @@
       spikes: [],
       decorations: [],
       fireballs: [],
+      firestorms: [],
+      firestormAcc: 0,
       particles: [],
       floatTexts: [],
 

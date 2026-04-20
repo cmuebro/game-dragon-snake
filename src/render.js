@@ -34,6 +34,7 @@
     }
 
     for (const f of state.fireballs) drawFireball(f);
+    if (state.firestorms && state.firestorms.length) drawFirestorms(state);
 
     Dragon.dragonRenderer.draw(ctx, state, ts);
 
@@ -362,6 +363,22 @@
     ctx.beginPath(); ctx.arc(0, 0, 8 * s, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#ffe27a';
     ctx.beginPath(); ctx.arc(0, 0, 4 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawFirestorms(state) {
+    ctx.save();
+    ctx.shadowColor = '#ff8a3a';
+    ctx.shadowBlur = 14;
+    for (const f of state.firestorms) {
+      const fade = Math.max(0.15, Math.min(1, f.life / 600));
+      ctx.fillStyle = '#ff6f4a';
+      ctx.globalAlpha = fade;
+      ctx.beginPath(); ctx.arc(f.px, f.py, 5.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffe27a';
+      ctx.beginPath(); ctx.arc(f.px, f.py, 2.5, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
     ctx.restore();
   }
 

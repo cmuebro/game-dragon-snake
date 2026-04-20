@@ -133,6 +133,23 @@
   });
 
   register({
+    id: 'firestorm', slot: 'secondary', price: 180,
+    icon: '🌋', name: 'Feuersturm',
+    desc: 'Shift: 3s lang speit jedes Körpersegment Feuerbälle in alle Richtungen.',
+    cooldown: 60000,
+    upgrades: [
+      { desc: '+ Schnellere und dichtere Feuerbälle.', price: 220 },
+      { desc: '+ Noch dichter, zerstört zusätzlich Wände & Stacheln.', price: 300 },
+    ],
+    activate(state) {
+      state.activeEffects.firestorm = 3000;
+      state.firestormAcc = 0;
+      Dragon.particles.burst(state.snake[0], 22, '#ff8a3a');
+      state.screenShake = 7;
+    },
+  });
+
+  register({
     id: 'storm', slot: 'secondary', price: 90,
     icon: '❄', name: 'Eissturm',
     desc: 'Shift: friert alle Rivalen 4s ein.',

@@ -84,6 +84,8 @@
     }
     s.items = [];
     s.fireballs = [];
+    s.firestorms = [];
+    s.firestormAcc = 0;
     s.particles = [];
     s.floatTexts = [];
     s.tickMs = lvl.speed;
@@ -247,6 +249,85 @@
     if (s.goalProgress >= lvl.goal) levelComplete();
   }
 
+  const FIRESTORM_TIERS = [
+    { interval: 300, everyN: 2, perSegment: 1, speed: 4.0, lifeMs: 900, affectWalls: false },
+    { interval: 220, everyN: 1, perSegment: 1, speed: 5.5, lifeMs: 900, affectWalls: false },
+    { interval: 140, everyN: 1, perSegment: 2, speed: 7.0, lifeMs: 900, affectWalls: true  },
+  ];
+  const FIRESTORM_MAX_ACTIVE = 260;
+
+  function firestormTier(s) {
+    const t = Dragon.abilities.levelOf(s, 'firestorm');
+    return FIRESTORM_TIERS[Math.max(0, Math.min(FIRESTORM_TIERS.length - 1, t - 1))];
+  }
+
+  function spawnFirestormBurst(s) {
+    const cfg = firestormTier(s);
+    const CELL = Dragon.config.CELL;
+    if (s.firestorms.length > FIRESTORM_MAX_ACTIVE) return;
+    for (let i = 0; i < s.snake.length; i += cfg.everyN) {
+      const seg = s.snake[i];
+      const cx = seg.x * CELL + CELL / 2;
+      const cy = seg.y * CELL + CELL / 2;
+      for (let k = 0; k < cfg.perSegment; k++) {
+        const ang = Math.random() * Math.PI * 2;
+        s.firestorms.push({
+          px: cx, py: cy,
+          vx: Math.cos(ang) * cfg.speed,
+          vy: Math.sin(ang) * cfg.speed,
+          life: cfg.lifeMs,
+        });
+      }
+    }
+  }
+
+  function updateFirestorm(s, dt) {
+    const cfg = firestormTier(s);
+    s.firestormAcc = (s.firestormAcc || 0) + dt;
+    while (s.firestormAcc >= cfg.interval) {
+      s.firestormAcc -= cfg.interval;
+      spawnFirestormBurst(s);
+    }
+  }
+
+  function updateFirestormProjectiles(s, dt) {
+    const cfg = firestormTier(s);
+    const CELL = Dragon.config.CELL;
+    const CW = Dragon.config.CANVAS_SIZE;
+    const out = [];
+    for (const f of s.firestorms) {
+      f.px += f.vx;
+      f.py += f.vy;
+      f.life -= dt;
+      if (f.life <= 0 || f.px < -20 || f.py < -20 || f.px > CW + 20 || f.py > CW + 20) continue;
+      const gx = Math.floor(f.px / CELL);
+      const gy = Math.floor(f.py / CELL);
+      let hit = false;
+      for (const r of [...s.rivals]) {
+        if (r.segments.some(seg => seg.x === gx && seg.y === gy)) {
+          Dragon.rivals.damage(s, r, Math.round(DAMAGE.FIRE_VS_RIVAL * 0.4));
+          Dragon.particles.burst({ x: gx, y: gy }, 8, '#ff6f4a');
+          hit = true;
+          break;
+        }
+      }
+      if (hit) continue;
+      if (cfg.affectWalls) {
+        const wi = s.walls.findIndex(w => w.x === gx && w.y === gy);
+        if (wi >= 0) {
+          const wall = s.walls[wi];
+          if (wall.spiked) { wall.spiked = false; Dragon.particles.burst({ x: gx, y: gy }, 8, '#e8dcc8'); }
+          else { s.walls.splice(wi, 1); Dragon.particles.burst({ x: gx, y: gy }, 10, '#b0841e'); }
+          continue;
+        }
+        const si = s.spikes.findIndex(sp => sp.x === gx && sp.y === gy);
+        if (si >= 0) { s.spikes.splice(si, 1); Dragon.particles.burst({ x: gx, y: gy }, 8, '#ff6f4a'); continue; }
+      }
+      out.push(f);
+    }
+    s.firestorms = out;
+  }
+
   function updateHammer(s, dt) {
     const tier = Dragon.abilities.levelOf(s, 'hammer');
     const rotSpeed = tier >= 3 ? 0.0055 : 0.003;
@@ -395,6 +476,8 @@
         }
 
         if (s.activeEffects.hammer > 0) updateHammer(s, dt);
+        if (s.activeEffects.firestorm > 0) updateFirestorm(s, dt);
+        if (s.firestorms && s.firestorms.length) updateFirestormProjectiles(s, dt);
         const slow = s.activeEffects.slowtime > 0;
         s.timeScale = slow ? 0.6 : 1;
         const rivalScale = slow ? 0.45 : 1;
