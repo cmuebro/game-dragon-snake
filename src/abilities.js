@@ -81,11 +81,12 @@
 
   register({
     id: 'magnet', slot: 'passive', price: 55,
-    icon: '🧲', name: 'Juwelenmagnet',
+    icon: '🧲', name: 'Magnet',
     desc: 'Passiv: zieht Juwelen & Münzen in geringer Reichweite an.',
     cooldown: 0,
     upgrades: [
       { desc: '+ Größere Reichweite und stärkere Anziehung.', price: 100 },
+      { desc: '+ Zieht zusätzlich Früchte aus 1 Feld Entfernung an.', price: 170 },
     ],
   });
 

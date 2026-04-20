@@ -391,9 +391,13 @@
     const RANGE = tier >= 2 ? 9 : 5;
     for (const it of s.items) {
       const def = Dragon.items.types[it.type];
-      if (!def || !def.magnetic) continue;
+      if (!def) continue;
+      const foodPull = tier >= 3 && it.type === 'food';
+      if (!def.magnetic && !foodPull) continue;
       const dx = h.x - it.x, dy = h.y - it.y;
-      if (Math.abs(dx) + Math.abs(dy) > RANGE) continue;
+      const dist = Math.abs(dx) + Math.abs(dy);
+      const range = foodPull ? 1 : RANGE;
+      if (dist > range) continue;
       it.x += Math.min(Math.abs(dx), PULL) * Math.sign(dx);
       it.y += Math.min(Math.abs(dy), PULL) * Math.sign(dy);
     }
