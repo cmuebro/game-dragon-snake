@@ -51,9 +51,15 @@
     icon: '🪶', name: 'Häutung',
     desc: 'Leertaste: streift 3 Schuppen ab — verkürzt den Drachen.',
     cooldown: 30000,
+    upgrades: [
+      { desc: '+ Streift 5 Schuppen ab.', price: 70 },
+      { desc: '+ Streift 7 Schuppen ab.', price: 140 },
+    ],
     activate(state) {
       if (state.snake.length <= 4) return false;
-      const reduceBy = Math.min(3, state.snake.length - 2);
+      const tier = (state.abilityLevels && state.abilityLevels.shed) || 1;
+      const count = tier >= 3 ? 7 : tier >= 2 ? 5 : 3;
+      const reduceBy = Math.min(count, state.snake.length - 2);
       for (let i = 0; i < reduceBy; i++) {
         const tail = state.snake[state.snake.length - 1];
         Dragon.particles.burst(tail, 10, '#ffe27a');
