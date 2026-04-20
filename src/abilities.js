@@ -7,18 +7,25 @@
 
   function shootFire(state) {
     const head = state.snake[0];
-    for (let i = 1; i <= 6; i++) {
-      const p = { x: head.x + state.dir.x * i, y: head.y + state.dir.y * i };
-      state.fireballs.push({ ...p, life: 500, dx: state.dir.x, dy: state.dir.y });
-      const wi = state.walls.findIndex(w => w.x === p.x && w.y === p.y);
-      if (wi >= 0) { state.walls.splice(wi, 1); Dragon.particles.burst(p, 15, '#ff6f4a'); }
-      const si = state.spikes.findIndex(s => s.x === p.x && s.y === p.y);
-      if (si >= 0) { state.spikes.splice(si, 1); Dragon.particles.burst(p, 12, '#ff6f4a'); }
-      for (const r of [...state.rivals]) {
-        if (r.segments.some(s => s.x === p.x && s.y === p.y)) {
-          Dragon.rivals.damage(state, r, Dragon.config.DAMAGE.FIRE_VS_RIVAL);
-          Dragon.particles.burst(p, 18, '#ff6f4a');
-          break;
+    const tier = (state.abilityLevels && state.abilityLevels.fire) || 1;
+    const length = tier >= 2 ? 12 : 6;
+    const dx = state.dir.x, dy = state.dir.y;
+    const nx = -dy, ny = dx;
+    const lateralOffsets = tier >= 3 ? [-1, 0, 1] : [0];
+    for (let i = 1; i <= length; i++) {
+      for (const lo of lateralOffsets) {
+        const p = { x: head.x + dx * i + nx * lo, y: head.y + dy * i + ny * lo };
+        state.fireballs.push({ ...p, life: 500, dx, dy });
+        const wi = state.walls.findIndex(w => w.x === p.x && w.y === p.y);
+        if (wi >= 0) { state.walls.splice(wi, 1); Dragon.particles.burst(p, 15, '#ff6f4a'); }
+        const si = state.spikes.findIndex(s => s.x === p.x && s.y === p.y);
+        if (si >= 0) { state.spikes.splice(si, 1); Dragon.particles.burst(p, 12, '#ff6f4a'); }
+        for (const r of [...state.rivals]) {
+          if (r.segments.some(s => s.x === p.x && s.y === p.y)) {
+            Dragon.rivals.damage(state, r, Dragon.config.DAMAGE.FIRE_VS_RIVAL);
+            Dragon.particles.burst(p, 18, '#ff6f4a');
+            break;
+          }
         }
       }
     }
@@ -85,8 +92,12 @@
   register({
     id: 'fire', slot: 'primary', price: 70,
     icon: '🔥', name: 'Feueratem',
-    desc: 'Leertaste: Flammen verbrennen Hindernisse.',
+    desc: 'Leertaste: Flammen verbrennen Hindernisse (6 Felder).',
     cooldown: 6000,
+    upgrades: [
+      { desc: '+ Doppelte Reichweite (12 Felder).', price: 130 },
+      { desc: '+ 3 Felder breit.', price: 220 },
+    ],
     activate(state) { shootFire(state); },
   });
 
