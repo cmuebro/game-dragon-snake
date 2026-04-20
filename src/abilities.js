@@ -1,6 +1,5 @@
 (function (Dragon) {
   'use strict';
-  const { W, H } = Dragon.config;
 
   const list = [];
   function register(def) { list.push(def); }
@@ -30,18 +29,6 @@
       }
     }
     state.screenShake = 8;
-  }
-
-  function teleportForward(state, n) {
-    const head = state.snake[0];
-    const target = {
-      x: (head.x + state.dir.x * n + W) % W,
-      y: (head.y + state.dir.y * n + H) % H,
-    };
-    Dragon.particles.burst(head, 25, '#c89aff');
-    state.snake.unshift(target);
-    state.snake.pop();
-    Dragon.particles.burst(target, 25, '#c89aff');
   }
 
   // --- Ability registry: add with Dragon.abilities.register({...}) ---
@@ -106,14 +93,6 @@
     desc: 'Shift: 8s Zeit verlangsamen.',
     cooldown: 30000,
     activate(state) { state.activeEffects.slowtime = 8000; },
-  });
-
-  register({
-    id: 'teleport', slot: 'primary', price: 90,
-    icon: '✨', name: 'Sprungportal',
-    desc: 'Leertaste: 4 Felder nach vorn springen.',
-    cooldown: 7000,
-    activate(state) { teleportForward(state, 4); },
   });
 
   register({
