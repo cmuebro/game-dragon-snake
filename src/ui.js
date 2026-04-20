@@ -361,9 +361,6 @@
       const panelBtn = el('btnVolumeMute');
       if (panelBtn) panelBtn.classList.toggle('muted', !on);
     }
-    el('btnMusic').addEventListener('click', () => {
-      updateMusicUi(Dragon.audio.toggle());
-    });
     el('btnCheatClose').addEventListener('click', () => { closeCheat(); });
 
     el('btnInfo').addEventListener('click', () => { showImpressum(); });
@@ -391,10 +388,15 @@
       if (_volumePausedByPanel && s && s.running) s.paused = false;
       _volumePausedByPanel = false;
     }
-    el('btnVolume').addEventListener('click', (e) => {
+    el('btnMusic').addEventListener('click', (e) => {
       e.stopPropagation();
       if (volumePanel.hidden) openVolumePanel();
       else closeVolumePanel();
+    });
+    el('btnMusic').addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      if (!volumePanel.hidden) closeVolumePanel();
+      updateMusicUi(Dragon.audio.toggle());
     });
     volumePanel.addEventListener('click', (e) => { e.stopPropagation(); });
     volumeSlider.addEventListener('input', () => {
@@ -408,7 +410,7 @@
     });
     document.addEventListener('click', (e) => {
       if (volumePanel.hidden) return;
-      if (e.target === el('btnVolume') || el('btnVolume').contains(e.target)) return;
+      if (e.target === el('btnMusic') || el('btnMusic').contains(e.target)) return;
       closeVolumePanel();
     });
 

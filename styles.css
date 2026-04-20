@@ -253,7 +253,7 @@ canvas.slowtime {
 
 .volume-panel {
   position: absolute;
-  bottom: calc(100% + 8px);
+  top: calc(100% + 8px);
   right: 0;
   z-index: 12;
   padding: 12px 16px 10px;
