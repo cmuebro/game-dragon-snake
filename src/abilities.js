@@ -100,7 +100,15 @@
     icon: '👻', name: 'Geisterwandeln',
     desc: 'Shift: 2s durch Wände fliegen.',
     cooldown: 9000,
-    activate(state) { state.activeEffects.ghost = 2000; },
+    upgrades: [
+      { desc: '+ 4s Dauer.', price: 180 },
+      { desc: '+ 6s Dauer.', price: 280 },
+    ],
+    activate(state) {
+      const tier = (state.abilityLevels && state.abilityLevels.ghost) || 1;
+      const duration = tier >= 3 ? 6000 : tier >= 2 ? 4000 : 2000;
+      state.activeEffects.ghost = duration;
+    },
   });
 
   register({
