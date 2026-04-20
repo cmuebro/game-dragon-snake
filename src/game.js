@@ -330,7 +330,7 @@
 
   function updateHammer(s, dt) {
     const tier = Dragon.abilities.levelOf(s, 'hammer');
-    const rotSpeed = tier >= 3 ? 0.0055 : 0.003;
+    const rotSpeed = tier >= 3 ? 0.0075 : 0.0045;
     s.hammerAngle = (s.hammerAngle || 0) + dt * rotSpeed;
     const head = s.snake[0];
     if (!head) return;

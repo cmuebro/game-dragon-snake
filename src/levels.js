@@ -37,7 +37,7 @@
     for (let i = 1; i <= count; i++) {
       const theme = Dragon.themes.forLevel(i);
       const goal = 4 + Math.min(16, Math.floor(i * 0.5) + 2);
-      const speed = 150 - Math.min(100, i * 2.2);
+      const speed = 150 - Math.min(110, i * 2.8);
       const wallsBase = Math.min(68, 10 + Math.floor(i * 1.4));
       const rivals = i >= 2 ? Math.min(5, 1 + Math.floor((i - 2) / 8)) : 0;
       const spikeFields = i >= 15 ? Math.min(12, Math.floor((i - 13) / 3)) : 0;
