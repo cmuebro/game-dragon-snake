@@ -1,0 +1,6 @@
+# Alle Ordner ignorieren
+/*/
+
+# Aber diese ausnehmen:
+!music/
+!src/
