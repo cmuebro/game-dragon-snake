@@ -473,7 +473,11 @@ canvas.slowtime {
   gap: 12px;
   overflow-y: auto;
 }
-.volume-wrap { position: relative; }
+.volume-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
 
 h1 {
   font-family: 'MedievalSharp', 'Cinzel', Georgia, serif;
