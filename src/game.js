@@ -492,7 +492,9 @@
         const rivalScale = slow ? 0.45 : 1;
 
         s.tickAcc += dt * s.timeScale;
-        const interval = s.tickMs;
+        const steadyTier = Dragon.abilities.levelOf(s, 'steady');
+        const steadyMult = steadyTier >= 3 ? 1 / 0.40 : steadyTier >= 2 ? 1 / 0.60 : steadyTier >= 1 ? 1 / 0.75 : 1;
+        const interval = s.tickMs * steadyMult;
         let safety = 10;
         while (s.tickAcc >= interval && s.running && safety-- > 0) {
           s.tickAcc -= interval;

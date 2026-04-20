@@ -181,6 +181,17 @@
   });
 
   register({
+    id: 'steady', slot: 'passive', price: 90,
+    icon: '🪷', name: 'Gelassenheit',
+    desc: 'Passiv: verlangsamt die Drachenbewegung um 25%.',
+    cooldown: 0,
+    upgrades: [
+      { desc: '+ Verlangsamt um insgesamt 40%.', price: 160 },
+      { desc: '+ Verlangsamt um insgesamt 60%.', price: 250 },
+    ],
+  });
+
+  register({
     id: 'regen', slot: 'passive', price: 75,
     icon: '🕊', name: 'Läuterung',
     desc: 'Passiv: regeneriert 1 HP pro Sekunde.',
