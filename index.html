@@ -261,6 +261,18 @@
   <button class="corner-btn corner-btn-fixed" id="btnInfo" title="Impressum" aria-label="Impressum">
     <span class="info-icon">§</span>
   </button>
+  <button class="corner-btn corner-btn-volume" id="btnVolume" title="Lautstärke" aria-label="Lautstärke">
+    <span class="volume-icon">♪</span>
+  </button>
+  <div class="volume-panel" id="volumePanel" hidden>
+    <label class="volume-panel-label" for="volumeSlider">Musik-Lautstärke</label>
+    <input type="range" id="volumeSlider" min="0" max="100" value="5" step="1">
+    <span class="volume-panel-value" id="volumeValue">5%</span>
+    <button type="button" class="volume-panel-mute" id="btnVolumeMute">
+      <span id="btnVolumeMuteIcon">🎵</span>
+      <span id="btnVolumeMuteText">Musik an</span>
+    </button>
+  </div>
 </div>
 
 <script src="music/songs.csv.js" onerror="this.dataset.missing='1'"></script>

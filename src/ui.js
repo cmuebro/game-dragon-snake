@@ -348,12 +348,20 @@
     el('btnRetry').addEventListener('click',      () => { hideAllScreens(); Dragon.game.retry(); });
     el('btnFromStart').addEventListener('click',  () => { hideAllScreens(); Dragon.game.start(0); });
     el('btnRestart').addEventListener('click',    () => { hideAllScreens(); Dragon.game.start(0); });
+    function updateMusicUi(on) {
+      const hudIcon = el('btnMusicIcon');
+      if (hudIcon) hudIcon.textContent = on ? '🎵' : '🔇';
+      const hudBtn = el('btnMusic');
+      if (hudBtn) hudBtn.classList.toggle('muted', !on);
+      const panelIcon = el('btnVolumeMuteIcon');
+      if (panelIcon) panelIcon.textContent = on ? '🎵' : '🔇';
+      const panelText = el('btnVolumeMuteText');
+      if (panelText) panelText.textContent = on ? 'Musik an' : 'Musik aus';
+      const panelBtn = el('btnVolumeMute');
+      if (panelBtn) panelBtn.classList.toggle('muted', !on);
+    }
     el('btnMusic').addEventListener('click', () => {
-      const on = Dragon.audio.toggle();
-      const icon = el('btnMusicIcon');
-      if (icon) icon.textContent = on ? '🎵' : '🔇';
-      const btn = el('btnMusic');
-      if (btn) btn.classList.toggle('muted', !on);
+      updateMusicUi(Dragon.audio.toggle());
     });
     el('btnCheatClose').addEventListener('click', () => { closeCheat(); });
 
@@ -361,6 +369,29 @@
     el('btnImpressumClose').addEventListener('click', () => { closeImpressum(); });
     el('impressumScreen').addEventListener('click', (e) => {
       if (e.target === el('impressumScreen')) closeImpressum();
+    });
+
+    const volumePanel = el('volumePanel');
+    const volumeSlider = el('volumeSlider');
+    const volumeValue = el('volumeValue');
+    el('btnVolume').addEventListener('click', (e) => {
+      e.stopPropagation();
+      volumePanel.hidden = !volumePanel.hidden;
+    });
+    volumePanel.addEventListener('click', (e) => { e.stopPropagation(); });
+    volumeSlider.addEventListener('input', () => {
+      const pct = parseInt(volumeSlider.value, 10);
+      volumeValue.textContent = pct + '%';
+      Dragon.audio.setVolume(pct / 100);
+    });
+    el('btnVolumeMute').addEventListener('click', (e) => {
+      e.stopPropagation();
+      updateMusicUi(Dragon.audio.toggle());
+    });
+    document.addEventListener('click', (e) => {
+      if (volumePanel.hidden) return;
+      if (e.target === el('btnVolume') || el('btnVolume').contains(e.target)) return;
+      volumePanel.hidden = true;
     });
 
     el('cheatCoins').addEventListener('click', () => {
