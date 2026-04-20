@@ -439,6 +439,8 @@
       }
       updateShortCdLabel();
     });
+
+    updateMusicUi(Dragon.audio.isEnabled());
   }
 
   function updateShortCdLabel() {

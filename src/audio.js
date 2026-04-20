@@ -10,7 +10,7 @@
   let pendingPlay = false;
 
   let audioEl = null;
-  let enabled = true;
+  let enabled = false;
   let volume = 0.05;
   let currentIdx = 0;
   let trackErrors = 0;
