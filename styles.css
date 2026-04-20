@@ -231,6 +231,12 @@ canvas.slowtime {
     0 3px 8px rgba(60,30,10,0.45);
 }
 .corner-btn-bottom { bottom: 22px; right: 22px; }
+.corner-btn-fixed {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  z-index: 12;
+}
 .corner-btn:hover { background: linear-gradient(180deg, #f8d884, #d49828); }
 .corner-btn:active { transform: scale(0.94); }
 
@@ -465,25 +471,8 @@ canvas.slowtime {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  overflow: hidden;
-}
-.side-scroll {
-  flex: 1;
-  min-height: 0;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
-.side-corner {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px;
-  padding-top: 8px;
-  position: relative;
-}
-.side-corner .corner-btn { position: static; }
 .volume-wrap { position: relative; }
 
 h1 {
