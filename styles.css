@@ -240,9 +240,10 @@ canvas.slowtime {
 .corner-btn-fixed .info-icon {
   font-family: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
   font-weight: 700;
-  font-style: italic;
-  font-size: 24px;
+  font-size: 26px;
   line-height: 1;
+  display: block;
+  transform: translateY(-1px);
 }
 .corner-btn:hover { background: linear-gradient(180deg, #f8d884, #d49828); }
 .corner-btn:active { transform: scale(0.94); }
