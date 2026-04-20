@@ -375,9 +375,26 @@
     const volumePanel = el('volumePanel');
     const volumeSlider = el('volumeSlider');
     const volumeValue = el('volumeValue');
+    let _volumePausedByPanel = false;
+    function openVolumePanel() {
+      const s = Dragon.state;
+      _volumePausedByPanel = false;
+      if (s && s.running && !s.paused) {
+        s.paused = true;
+        _volumePausedByPanel = true;
+      }
+      volumePanel.hidden = false;
+    }
+    function closeVolumePanel() {
+      volumePanel.hidden = true;
+      const s = Dragon.state;
+      if (_volumePausedByPanel && s && s.running) s.paused = false;
+      _volumePausedByPanel = false;
+    }
     el('btnVolume').addEventListener('click', (e) => {
       e.stopPropagation();
-      volumePanel.hidden = !volumePanel.hidden;
+      if (volumePanel.hidden) openVolumePanel();
+      else closeVolumePanel();
     });
     volumePanel.addEventListener('click', (e) => { e.stopPropagation(); });
     volumeSlider.addEventListener('input', () => {
@@ -392,7 +409,7 @@
     document.addEventListener('click', (e) => {
       if (volumePanel.hidden) return;
       if (e.target === el('btnVolume') || el('btnVolume').contains(e.target)) return;
-      volumePanel.hidden = true;
+      closeVolumePanel();
     });
 
     el('cheatCoins').addEventListener('click', () => {
