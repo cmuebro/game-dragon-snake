@@ -9,7 +9,7 @@ keine Build-Tools, kein Framework.
 
 ## Features
 
-- **50 handgestaltete Level** über sieben Welten: Sonnenwiesen, Wälder,
+- **50 Level** über sieben Welten: Sonnenwiesen, Wälder,
   Eisberge, Vulkane, Sternenfelder, Ozean-Tiefen, Wüste, Schattenreich,
   Kristallhallen und schließlich der Drachenthron. Jedes zehnte Level ist
   ein Boss-Kampf.
